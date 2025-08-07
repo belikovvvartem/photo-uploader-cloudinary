@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Photo Uploader</title>
   <style>
-  * {
+>
+    * {
       box-sizing: border-box;
     }
 
@@ -27,6 +28,7 @@
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       max-width: 400px;
       width: 100%;
+      position: relative;
     }
 
     h1 {
@@ -42,8 +44,8 @@
       transition: 0.3s;
     }
 
-    .upload-area:hover {
-      background-color: #f8f9ff;
+    .upload-area.ready {
+      border-color: #28a745;
     }
 
     .upload-area::before {
@@ -51,6 +53,12 @@
       font-size: 48px;
       color: #007bff;
       display: block;
+      transition: 0.3s;
+    }
+
+    .upload-area.ready::before {
+      content: '✓';
+      color: #28a745;
     }
 
     #fileInput {
@@ -100,7 +108,28 @@
 
     a {
       color: #007bff;
-      word-break: break-all;
+      word-break: break-word;
+    }
+
+    /* Спливаюче повідомлення */
+    .toast {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -115,11 +144,22 @@
         <button onclick="uploadImage()">Отримати посилання</button>
         <div id="loader" style="display:none;" class="loader"></div>
         <div id="result"></div>
+        <div id="toast" class="toast">Скопійовано!</div>
       </div>
+      
 
   <script>
     const fileInput = document.getElementById('fileInput');
     const dropArea = document.getElementById('dropArea');
+    const toast = document.getElementById('toast');
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        dropArea.classList.add('ready');
+      } else {
+        dropArea.classList.remove('ready');
+      }
+    });
 
     dropArea.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -134,6 +174,7 @@
       e.preventDefault();
       fileInput.files = e.dataTransfer.files;
       dropArea.style.backgroundColor = "transparent";
+      dropArea.classList.add('ready');
     });
 
     async function uploadImage() {
@@ -175,8 +216,15 @@
 
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        alert('Скопійовано до буфера обміну!');
+        showToast();
       });
+    }
+
+    function showToast() {
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
     }
   </script>
 </body>
