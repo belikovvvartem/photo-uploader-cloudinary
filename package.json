@@ -4,5 +4,22 @@
   "dependencies": {
     "cloudinary": "^1.41.3",
     "formidable": "^3.7.0"
-  }
+  },
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/belikovvvartem/photo-uploader-cloudinary.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/belikovvvartem/photo-uploader-cloudinary/issues"
+  },
+  "homepage": "https://github.com/belikovvvartem/photo-uploader-cloudinary#readme",
+  "description": ""
 }
