@@ -5,81 +5,177 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Photo Uploader</title>
   <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: #fff;
-      color: #222;
+  * {
+      box-sizing: border-box;
     }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
     h1 {
       margin-bottom: 20px;
+    }
+
+    .upload-area {
+      border: 2px dashed #007bff;
+      padding: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: 0.3s;
+    }
+
+    .upload-area:hover {
+      background-color: #f8f9ff;
+    }
+
+    .upload-area::before {
+      content: '+';
+      font-size: 48px;
       color: #007bff;
+      display: block;
     }
-    input[type="file"] {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+
+    #fileInput {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
     }
+
     button {
-      margin-top: 10px;
+      margin-top: 20px;
       padding: 10px 20px;
-      background: #007bff;
+      background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 5px;
+      font-size: 16px;
       cursor: pointer;
-      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
     #result {
       margin-top: 20px;
-      max-width: 90vw;
-      word-break: break-word;
+    }
+
+    .loader {
+      margin: 20px auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    a {
+      color: #007bff;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
-  <h1>Upload your photo</h1>
-  <input type="file" id="fileInput" accept="image/*" />
-  <button onclick="uploadImage()">Upload</button>
-  <div id="result"></div>
+    <div class="container">
+        <h1>Завантажте фото</h1>
+    
+        <div class="upload-area" id="dropArea">
+          <input type="file" id="fileInput" accept="image/*" />
+        </div>
+    
+        <button onclick="uploadImage()">Отримати посилання</button>
+        <div id="loader" style="display:none;" class="loader"></div>
+        <div id="result"></div>
+      </div>
 
   <script>
+    const fileInput = document.getElementById('fileInput');
+    const dropArea = document.getElementById('dropArea');
+
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.style.backgroundColor = "#eef6ff";
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.style.backgroundColor = "transparent";
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileInput.files = e.dataTransfer.files;
+      dropArea.style.backgroundColor = "transparent";
+    });
+
     async function uploadImage() {
-      const fileInput = document.getElementById('fileInput');
       if (!fileInput.files.length) {
-        alert('Please select a file!');
+        alert('Завантажте фото!');
         return;
       }
+
       const file = fileInput.files[0];
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('result').innerHTML = '';
 
-      const data = await response.json();
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-      const resultDiv = document.getElementById('result');
-      if (response.ok && data.url) {
-        resultDiv.innerHTML = `
-          <p><strong>Link:</strong> <a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a></p>
-          <button onclick="copyToClipboard('${data.url}')">Copy Link</button>
-        `;
-      } else {
-        resultDiv.textContent = 'Upload failed: ' + (data.error || 'Unknown error');
+        const data = await response.json();
+        const resultDiv = document.getElementById('result');
+
+        if (response.ok && data.url) {
+          resultDiv.innerHTML = `
+            <p><strong>Link:</strong> <a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a></p>
+            <button onclick="copyToClipboard('${data.url}')">Копіювати посилання</button>
+          `;
+        } else {
+          resultDiv.textContent = 'Помилка: ' + (data.error || 'Невідома помилка');
+        }
+      } catch (err) {
+        document.getElementById('result').textContent = 'Помилка при запиті';
+      } finally {
+        document.getElementById('loader').style.display = 'none';
       }
     }
 
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard!');
+        alert('Скопійовано до буфера обміну!');
       });
     }
   </script>
