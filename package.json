@@ -1,5 +1,8 @@
 {
+  "name": "fotohosting",
+  "version": "1.0.0",
   "dependencies": {
-    "formidable": "^3.5.4"
+    "cloudinary": "^1.41.3",
+    "formidable": "^3.7.0"
   }
 }
