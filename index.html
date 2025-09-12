@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Photo Uploader</title>
   <style>
-        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
 
     * {
       box-sizing: border-box;
@@ -120,8 +121,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     a {
@@ -173,22 +179,23 @@
     }
   </style>
 </head>
+
 <body>
-    <button class="clear-btn" id="clearBtn" onclick="clearResults()">Очистити</button>
-    <div class="container">
-        <h1>Завантажте фото</h1>
-    
-        <div class="upload-area" id="dropArea">
-          <span class="file-count" id="fileCount"></span>
-          <input type="file" id="fileInput" accept="image/*" multiple/>
-        </div>
-    
-        <button onclick="uploadImage()">Отримати посилання</button>
-        <div id="loader" style="display:none;" class="loader"></div>
-        <div id="result"></div>
-        <div id="toast" class="toast">Скопійовано!</div>
-      </div>
-      
+  <button class="clear-btn" id="clearBtn" onclick="clearResults()">Очистити</button>
+  <div class="container">
+    <h1>Завантажте фото</h1>
+
+    <div class="upload-area" id="dropArea">
+      <span class="file-count" id="fileCount"></span>
+      <input type="file" id="fileInput" accept="image/*" multiple />
+    </div>
+
+    <button onclick="uploadImage()">Отримати посилання</button>
+    <div id="loader" style="display:none;" class="loader"></div>
+    <div id="result"></div>
+    <div id="toast" class="toast">Скопійовано!</div>
+  </div>
+
 
   <script>
     const fileInput = document.getElementById('fileInput');
@@ -207,6 +214,14 @@
         dropArea.classList.remove('ready');
       }
     }
+
+
+    fileInput.addEventListener('change', function () {
+      if (this.files.length > 15) {
+        alert("Можна завантажити максимум 15 фото!");
+        this.value = ""; 
+      }
+    });
 
     fileInput.addEventListener('change', updateFileCount);
 
@@ -280,4 +295,5 @@
     }
   </script>
 </body>
+
 </html>
