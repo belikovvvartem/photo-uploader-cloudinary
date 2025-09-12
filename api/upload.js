@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
     try {
       const urls = [];
-      for (const file of fileArray.slice(0, 5)) { // максимум 5 фото
+      for (const file of fileArray.slice(0, 15)) { // максимум 5 фото
         const result = await cloudinary.uploader.upload(file.filepath, {
           folder: 'uploads',
         });
