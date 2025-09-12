@@ -62,6 +62,23 @@
       color: #28a745;
     }
 
+    /* Лічильник */
+    .file-count {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #28a745;
+      color: white;
+      font-size: 14px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .upload-area.ready .file-count {
+      display: inline-block;
+    }
+
     #fileInput {
       position: absolute;
       top: 0;
@@ -131,13 +148,38 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Кнопка очищення */
+    .clear-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .clear-btn.show {
+      display: inline-block;
+    }
+
+    .clear-btn:hover {
+      background-color: #a71d2a;
+    }
   </style>
 </head>
 <body>
+    <button class="clear-btn" id="clearBtn" onclick="clearResults()">Очистити</button>
     <div class="container">
         <h1>Завантажте фото</h1>
     
         <div class="upload-area" id="dropArea">
+          <span class="file-count" id="fileCount"></span>
           <input type="file" id="fileInput" accept="image/*" multiple />
         </div>
     
@@ -151,15 +193,22 @@
   <script>
     const fileInput = document.getElementById('fileInput');
     const dropArea = document.getElementById('dropArea');
+    const fileCount = document.getElementById('fileCount');
     const toast = document.getElementById('toast');
+    const clearBtn = document.getElementById('clearBtn');
 
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) {
+    function updateFileCount() {
+      const count = fileInput.files.length;
+      if (count > 0) {
+        fileCount.textContent = count;
         dropArea.classList.add('ready');
       } else {
+        fileCount.textContent = '';
         dropArea.classList.remove('ready');
       }
-    });
+    }
+
+    fileInput.addEventListener('change', updateFileCount);
 
     dropArea.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -174,7 +223,7 @@
       e.preventDefault();
       fileInput.files = e.dataTransfer.files;
       dropArea.style.backgroundColor = "transparent";
-      dropArea.classList.add('ready');
+      updateFileCount();
     });
 
     async function uploadImage() {
@@ -199,6 +248,7 @@
             <p><strong>Link:</strong> <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></p>
             <button onclick="copyToClipboard('${url}')">Копіювати</button>
           `).join('');
+          clearBtn.classList.add('show');
         } else {
           resultDiv.textContent = 'Помилка: ' + (data.error || 'Невідома помилка');
         }
@@ -220,6 +270,13 @@
       setTimeout(() => {
         toast.classList.remove('show');
       }, 2500);
+    }
+
+    function clearResults() {
+      document.getElementById('result').innerHTML = '';
+      fileInput.value = '';
+      updateFileCount();
+      clearBtn.classList.remove('show');
     }
   </script>
 </body>
