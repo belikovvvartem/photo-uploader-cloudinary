@@ -112,7 +112,6 @@
       word-break: break-word;
     }
 
-    /* Спливаюче повідомлення */
     .toast {
       position: absolute;
       top: 20px;
@@ -139,7 +138,7 @@
         <h1>Завантажте фото</h1>
     
         <div class="upload-area" id="dropArea">
-          <input type="file" id="fileInput" accept="image/*" />
+          <input type="file" id="fileInput" accept="image/*" multiple />
         </div>
     
         <button onclick="uploadImage()">Отримати посилання</button>
@@ -184,27 +183,22 @@
         return;
       }
 
-      const file = fileInput.files[0];
       const formData = new FormData();
-      formData.append('file', file);
+      [...fileInput.files].slice(0, 5).forEach(file => formData.append('file', file));
 
       document.getElementById('loader').style.display = 'block';
       document.getElementById('result').innerHTML = '';
 
       try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
+        const response = await fetch('/api/upload', { method: 'POST', body: formData });
         const data = await response.json();
         const resultDiv = document.getElementById('result');
 
-        if (response.ok && data.url) {
-          resultDiv.innerHTML = `
-            <p><strong>Link:</strong> <a href="${data.url}" target="_blank" rel="noopener noreferrer">${data.url}</a></p>
-            <button onclick="copyToClipboard('${data.url}')">Копіювати посилання</button>
-          `;
+        if (response.ok && data.urls) {
+          resultDiv.innerHTML = data.urls.map(url => `
+            <p><strong>Link:</strong> <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></p>
+            <button onclick="copyToClipboard('${url}')">Копіювати</button>
+          `).join('');
         } else {
           resultDiv.textContent = 'Помилка: ' + (data.error || 'Невідома помилка');
         }
