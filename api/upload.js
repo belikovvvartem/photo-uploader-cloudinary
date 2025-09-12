@@ -9,7 +9,7 @@ cloudinary.config({
 
 export const config = {
   api: {
-    bodyParser: false, // вимикаємо стандартний body parser
+    bodyParser: false, 
   },
 };
 
