@@ -180,7 +180,7 @@
     
         <div class="upload-area" id="dropArea">
           <span class="file-count" id="fileCount"></span>
-          <input type="file" id="fileInput" accept="image/*" multiple />
+          <input type="file" id="fileInput" accept="image/*" multiple/>
         </div>
     
         <button onclick="uploadImage()">Отримати посилання</button>
@@ -233,7 +233,7 @@
       }
 
       const formData = new FormData();
-      [...fileInput.files].slice(0, 5).forEach(file => formData.append('file', file));
+      [...fileInput.files].slice(0, 15).forEach(file => formData.append('file', file));
 
       document.getElementById('loader').style.display = 'block';
       document.getElementById('result').innerHTML = '';
