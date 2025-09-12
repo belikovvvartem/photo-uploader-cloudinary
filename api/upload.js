@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
 import formidable from 'formidable';
-import fs from 'fs';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,7 +9,7 @@ cloudinary.config({
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, // вимикаємо стандартний body parser
   },
 };
 
@@ -27,7 +26,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Error parsing the form' });
     }
 
-    // Normalize to array
+    // нормалізуємо до масиву
     const fileArray = Array.isArray(files.file) ? files.file : (files.file ? [files.file] : []);
 
     if (!fileArray.length) {
@@ -35,21 +34,13 @@ export default async function handler(req, res) {
     }
 
     try {
-      // If single file was sent, return single url for easier client handling
-      if (fileArray.length === 1) {
-        const file = fileArray[0];
-        const result = await cloudinary.uploader.upload(file.filepath, { folder: 'uploads' });
-        return res.status(200).json({ url: result.secure_url });
-      }
+      // 🔹 завантажуємо лише один файл за раз, щоб уникнути 413
+      const file = fileArray[0];
+      const result = await cloudinary.uploader.upload(file.filepath, {
+        folder: 'uploads',
+      });
 
-      // If multiple (legacy), upload up to 10 and return array
-      const urls = [];
-      for (const file of fileArray.slice(0, 10)) {
-        const result = await cloudinary.uploader.upload(file.filepath, { folder: 'uploads' });
-        urls.push(result.secure_url);
-      }
-
-      return res.status(200).json({ urls });
+      return res.status(200).json({ url: result.secure_url });
     } catch (uploadError) {
       console.error('Cloudinary error:', uploadError);
       return res.status(500).json({ error: 'Upload failed' });

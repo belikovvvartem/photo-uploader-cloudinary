@@ -77,155 +77,143 @@
     <div id="toast" class="toast">Скопійовано!</div>
   </div>
 
-<script>
-  const MAX_FILES = 10;
-  const fileInput = document.getElementById('fileInput');
-  const dropArea = document.getElementById('dropArea');
-  const fileCount = document.getElementById('fileCount');
-  const resultDiv = document.getElementById('result');
-  const loader = document.getElementById('loader');
-  const toast = document.getElementById('toast');
-  const clearBtn = document.getElementById('clearBtn');
-  const uploadBtn = document.getElementById('uploadBtn');
-
-  function updateFileCount() {
-    const count = fileInput.files.length;
-    fileCount.textContent = count > 0 ? count : '';
-    dropArea.classList.toggle('ready', count > 0);
-  }
-
-  fileInput.addEventListener('change', function () {
-    if (this.files.length > MAX_FILES) {
-      alert(`Можна завантажити максимум ${MAX_FILES} фото!`);
-      this.value = '';
+  <script>
+    const MAX_FILES = 10;
+    const fileInput = document.getElementById('fileInput');
+    const dropArea = document.getElementById('dropArea');
+    const fileCount = document.getElementById('fileCount');
+    const resultDiv = document.getElementById('result');
+    const loader = document.getElementById('loader');
+    const toast = document.getElementById('toast');
+    const clearBtn = document.getElementById('clearBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+  
+    function updateFileCount() {
+      const count = fileInput.files.length;
+      fileCount.textContent = count > 0 ? count : '';
+      dropArea.classList.toggle('ready', count > 0);
     }
-    updateFileCount();
-  });
-
-  dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.style.backgroundColor = "#eef6ff"; });
-  dropArea.addEventListener('dragleave', () => { dropArea.style.backgroundColor = "transparent"; });
-  dropArea.addEventListener('drop', e => {
-    e.preventDefault();
-    fileInput.files = e.dataTransfer.files;
-    dropArea.style.backgroundColor = "transparent";
-    updateFileCount();
-  });
-
-  // Resize large images client-side to reduce payload (max width 1600px)
-  function resizeImageIfNeeded(file, maxWidth = 1600, quality = 0.8) {
-    return new Promise(resolve => {
-      // If not an image or size already small, return original
-      if (!file.type.startsWith('image/')) return resolve(file);
-
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const img = new Image();
-        img.onload = () => {
-          if (img.width <= maxWidth) return resolve(file);
-          const ratio = maxWidth / img.width;
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.round(img.width * ratio);
-          canvas.height = Math.round(img.height * ratio);
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(blob => {
-            // keep filename but convert to jpg to save size
-            const newName = file.name.replace(/\.\w+$/, '.jpg');
-            const newFile = new File([blob], newName, { type: 'image/jpeg' });
-            resolve(newFile);
-          }, 'image/jpeg', quality);
+  
+    fileInput.addEventListener('change', function () {
+      if (this.files.length > MAX_FILES) {
+        alert(`Можна завантажити максимум ${MAX_FILES} фото!`);
+        this.value = '';
+      }
+      updateFileCount();
+    });
+  
+    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.style.backgroundColor = "#eef6ff"; });
+    dropArea.addEventListener('dragleave', () => { dropArea.style.backgroundColor = "transparent"; });
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault();
+      fileInput.files = e.dataTransfer.files;
+      dropArea.style.backgroundColor = "transparent";
+      updateFileCount();
+    });
+  
+    function resizeImageIfNeeded(file, maxWidth = 1600, quality = 0.8) {
+      return new Promise(resolve => {
+        if (!file.type.startsWith('image/')) return resolve(file);
+  
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            if (img.width <= maxWidth) return resolve(file);
+            const ratio = maxWidth / img.width;
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * ratio);
+            canvas.height = Math.round(img.height * ratio);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+              const newName = file.name.replace(/\.\w+$/, '.jpg');
+              resolve(new File([blob], newName, { type: 'image/jpeg' }));
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = () => resolve(file);
+          img.src = ev.target.result;
         };
-        img.onerror = () => resolve(file); // fallback
-        img.src = ev.target.result;
-      };
-      reader.onerror = () => resolve(file);
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function uploadSingleFile(file, idx) {
-    // show status row
-    const row = document.createElement('div');
-    row.className = 'file-row';
-    row.innerHTML = `<span>${idx+1}. ${file.name}</span><span class="file-status">Чекає...</span>`;
-    resultDiv.appendChild(row);
-
-    try {
-      // Resize to avoid 413
-      row.querySelector('.file-status').textContent = 'Оптимізація...';
-      const smallFile = await resizeImageIfNeeded(file);
-
-      // Upload
-      row.querySelector('.file-status').textContent = 'Завантаження...';
-      const fd = new FormData();
-      fd.append('file', smallFile);
-
-      const resp = await fetch('/api/upload', { method: 'POST', body: fd });
-      const json = await resp.json();
-
-      if (!resp.ok) {
-        row.querySelector('.file-status').textContent = `Помилка: ${json.error || resp.status}`;
+        reader.onerror = () => resolve(file);
+        reader.readAsDataURL(file);
+      });
+    }
+  
+    async function uploadSingleFile(file, idx) {
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = `<span>${idx+1}. ${file.name}</span><span class="file-status">Чекає...</span>`;
+      resultDiv.appendChild(row);
+  
+      try {
+        row.querySelector('.file-status').textContent = 'Оптимізація...';
+        const smallFile = await resizeImageIfNeeded(file);
+  
+        row.querySelector('.file-status').textContent = 'Завантаження...';
+        const fd = new FormData();
+        fd.append('file', smallFile);
+  
+        const resp = await fetch('/api/upload', { method: 'POST', body: fd });
+        const json = await resp.json();
+  
+        if (!resp.ok) {
+          row.querySelector('.file-status').textContent = `Помилка: ${json.error || resp.status}`;
+          return null;
+        }
+  
+        const url = json.url || (Array.isArray(json.urls) ? json.urls[0] : null);
+        if (!url) {
+          row.querySelector('.file-status').textContent = 'Помилка: невірна відповідь сервера';
+          return null;
+        }
+  
+        row.querySelector('.file-status').innerHTML = `Готово <button class="link-btn" onclick="copyToClipboard('${url}')">Копіювати</button>`;
+        const linkElem = document.createElement('div');
+        linkElem.style.marginTop = '6px';
+        linkElem.innerHTML = `<a href="${url}" target="_blank" rel="noopener">${url}</a>`;
+        row.appendChild(linkElem);
+  
+        return url;
+      } catch {
+        row.querySelector('.file-status').textContent = 'Помилка при завантаженні';
         return null;
       }
-
-      // server may return { url } or { urls }
-      const url = json.url || (Array.isArray(json.urls) ? json.urls[0] : null);
-      if (!url) {
-        row.querySelector('.file-status').textContent = 'Помилка: невірна відповідь сервера';
-        return null;
+    }
+  
+    async function uploadImage() {
+      if (!fileInput.files.length) { alert('Завантажте фото!'); return; }
+  
+      uploadBtn.disabled = true;
+      loader.style.display = 'block';
+      resultDiv.innerHTML = '';
+  
+      const files = [...fileInput.files].slice(0, MAX_FILES);
+      const urls = [];
+  
+      // 🔹 завантажуємо по одному, щоб уникнути 413
+      for (let i = 0; i < files.length; i++) {
+        const url = await uploadSingleFile(files[i], i);
+        if (url) urls.push(url);
       }
-
-      row.querySelector('.file-status').innerHTML = `Готово <button class="link-btn" onclick="copyToClipboard('${url}')">Копіювати</button>`;
-      // also add clickable link
-      const linkElem = document.createElement('div');
-      linkElem.style.marginTop = '6px';
-      linkElem.innerHTML = `<a href="${url}" target="_blank" rel="noopener">${url}</a>`;
-      row.appendChild(linkElem);
-
-      return url;
-    } catch (err) {
-      row.querySelector('.file-status').textContent = 'Помилка при завантаженні';
-      return null;
+  
+      loader.style.display = 'none';
+      uploadBtn.disabled = false;
+      if (urls.length) clearBtn.disabled = false;
     }
-  }
-
-  async function uploadImage() {
-    if (!fileInput.files.length) { alert('Завантажте фото!'); return; }
-
-    uploadBtn.disabled = true;
-    loader.style.display = 'block';
-    resultDiv.innerHTML = '';
-
-    const files = [...fileInput.files].slice(0, MAX_FILES);
-    const urls = [];
-
-    // sequential upload to avoid big multipart payloads and 413 errors
-    for (let i = 0; i < files.length; i++) {
-      const url = await uploadSingleFile(files[i], i);
-      if (url) urls.push(url);
+  
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      });
     }
-
-    loader.style.display = 'none';
-    uploadBtn.disabled = false;
-
-    if (urls.length) {
-      clearBtn.disabled = false;
+  
+    function clearResults() {
+      resultDiv.innerHTML = '';
+      fileInput.value = '';
+      updateFileCount();
+      clearBtn.disabled = true;
     }
-  }
-
-  function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2000);
-    });
-  }
-
-  function clearResults() {
-    resultDiv.innerHTML = '';
-    fileInput.value = '';
-    updateFileCount();
-    clearBtn.disabled = true;
-  }
-</script>
+  </script>
+  
 </body>
 </html>
