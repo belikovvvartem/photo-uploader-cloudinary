@@ -27,14 +27,25 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Error parsing the form' });
     }
 
-    const fileArray = Array.isArray(files.file) ? files.file : [files.file];
+    // Normalize to array
+    const fileArray = Array.isArray(files.file) ? files.file : (files.file ? [files.file] : []);
+
+    if (!fileArray.length) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
 
     try {
+      // If single file was sent, return single url for easier client handling
+      if (fileArray.length === 1) {
+        const file = fileArray[0];
+        const result = await cloudinary.uploader.upload(file.filepath, { folder: 'uploads' });
+        return res.status(200).json({ url: result.secure_url });
+      }
+
+      // If multiple (legacy), upload up to 10 and return array
       const urls = [];
-      for (const file of fileArray.slice(0, 10)) { // максимум 5 фото
-        const result = await cloudinary.uploader.upload(file.filepath, {
-          folder: 'uploads',
-        });
+      for (const file of fileArray.slice(0, 10)) {
+        const result = await cloudinary.uploader.upload(file.filepath, { folder: 'uploads' });
         urls.push(result.secure_url);
       }
 

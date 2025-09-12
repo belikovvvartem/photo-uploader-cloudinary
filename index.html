@@ -1,187 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Photo Uploader</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       font-family: "Comfortaa", sans-serif;
       background-color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       height: 100vh;
     }
-
     .container {
-      text-align: center;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      width: 100%;
-      position: relative;
+      text-align: center; padding: 30px; border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      max-width: 420px; width: 100%; position: relative;
     }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
+    h1 { margin-bottom: 20px; font-size: 20px; }
     .upload-area {
-      border: 2px dashed #007bff;
-      padding: 40px;
-      border-radius: 10px;
-      cursor: pointer;
-      position: relative;
-      transition: 0.3s;
+      border: 2px dashed #007bff; padding: 36px; border-radius: 10px;
+      cursor: pointer; position: relative; transition: 0.3s;
     }
-
-    .upload-area.ready {
-      border-color: #28a745;
-    }
-
+    .upload-area.ready { border-color: #28a745; }
     .upload-area::before {
-      content: '+';
-      font-size: 48px;
-      color: #007bff;
-      display: block;
-      transition: 0.3s;
+      content: '+'; font-size: 44px; color: #007bff; display: block; transition: 0.3s;
     }
-
-    .upload-area.ready::before {
-      content: '✓';
-      color: #28a745;
-    }
-
-    /* Лічильник */
+    .upload-area.ready::before { content: '✓'; color: #28a745; }
     .file-count {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: #28a745;
-      color: white;
-      font-size: 14px;
-      padding: 2px 8px;
-      border-radius: 12px;
-      display: none;
+      position: absolute; top: 8px; right: 10px; background-color: #28a745;
+      color: white; font-size: 13px; padding: 3px 8px; border-radius: 12px; display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
-
-    .upload-area.ready .file-count {
-      display: inline-block;
+    .upload-area.ready .file-count { display: inline-block; }
+    #fileInput { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    button.primary {
+      margin-top: 14px; padding: 10px 20px; background-color: #007bff; color: white;
+      border: none; border-radius: 5px; font-size: 15px; cursor: pointer;
     }
-
-    #fileInput {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #result {
-      margin-top: 20px;
-    }
-
-    .loader {
-      margin: 20px auto;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #007bff;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    a {
-      color: #007bff;
-      word-break: break-word;
-    }
-
-    .toast {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: #28a745;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 14px;
-      opacity: 0;
-      transform: translateY(-20px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      z-index: 1000;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Кнопка очищення */
+    button.primary:hover { background-color: #0056b3; }
+    #result { margin-top: 18px; text-align:left; max-height: 220px; overflow:auto; }
+    .loader { margin: 14px auto; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite; display:none; }
+    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    a { color: #007bff; word-break: break-word; }
+    .toast { position: fixed; top: 18px; right: 18px; background-color: #28a745; color: white; padding: 10px 18px; border-radius: 6px; font-size: 13px; opacity: 0; transform: translateY(-12px); transition: all .35s; z-index: 2000; }
+    .toast.show { opacity: 1; transform: translateY(0); }
     .clear-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      font-size: 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: none;
+      position: fixed; top: 15px; right: 15px; background-color: #dc3545; color: white;
+      border: none; padding: 7px 12px; font-size: 14px; border-radius: 6px; cursor: pointer; z-index: 2000;
+      opacity: 0.9;
     }
-
-    .clear-btn.show {
-      display: inline-block;
-    }
-
-    .clear-btn:hover {
-      background-color: #a71d2a;
-    }
+    .clear-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .file-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; font-size:14px; }
+    .file-status { font-size:13px; color:#666; margin-left:auto; }
+    .link-btn { margin-left:8px; padding:4px 8px; border-radius:4px; border:none; background:#007bff; color:#fff; cursor:pointer; font-size:13px; }
+    .link-btn:hover { background:#0056b3; }
   </style>
 </head>
-
 <body>
-  <button class="clear-btn" id="clearBtn" onclick="clearResults()">Очистити</button>
+  <button class="clear-btn" id="clearBtn" onclick="clearResults()" disabled>Очистити</button>
+
   <div class="container">
     <h1>Завантажте фото</h1>
 
@@ -190,110 +70,162 @@
       <input type="file" id="fileInput" accept="image/*" multiple />
     </div>
 
-    <button onclick="uploadImage()">Отримати посилання</button>
-    <div id="loader" style="display:none;" class="loader"></div>
+    <button class="primary" id="uploadBtn" onclick="uploadImage()">Отримати посилання</button>
+    <div id="loader" class="loader"></div>
+
     <div id="result"></div>
     <div id="toast" class="toast">Скопійовано!</div>
   </div>
 
+<script>
+  const MAX_FILES = 10;
+  const fileInput = document.getElementById('fileInput');
+  const dropArea = document.getElementById('dropArea');
+  const fileCount = document.getElementById('fileCount');
+  const resultDiv = document.getElementById('result');
+  const loader = document.getElementById('loader');
+  const toast = document.getElementById('toast');
+  const clearBtn = document.getElementById('clearBtn');
+  const uploadBtn = document.getElementById('uploadBtn');
 
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const dropArea = document.getElementById('dropArea');
-    const fileCount = document.getElementById('fileCount');
-    const toast = document.getElementById('toast');
-    const clearBtn = document.getElementById('clearBtn');
+  function updateFileCount() {
+    const count = fileInput.files.length;
+    fileCount.textContent = count > 0 ? count : '';
+    dropArea.classList.toggle('ready', count > 0);
+  }
 
-    function updateFileCount() {
-      const count = fileInput.files.length;
-      if (count > 0) {
-        fileCount.textContent = count;
-        dropArea.classList.add('ready');
-      } else {
-        fileCount.textContent = '';
-        dropArea.classList.remove('ready');
+  fileInput.addEventListener('change', function () {
+    if (this.files.length > MAX_FILES) {
+      alert(`Можна завантажити максимум ${MAX_FILES} фото!`);
+      this.value = '';
+    }
+    updateFileCount();
+  });
+
+  dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.style.backgroundColor = "#eef6ff"; });
+  dropArea.addEventListener('dragleave', () => { dropArea.style.backgroundColor = "transparent"; });
+  dropArea.addEventListener('drop', e => {
+    e.preventDefault();
+    fileInput.files = e.dataTransfer.files;
+    dropArea.style.backgroundColor = "transparent";
+    updateFileCount();
+  });
+
+  // Resize large images client-side to reduce payload (max width 1600px)
+  function resizeImageIfNeeded(file, maxWidth = 1600, quality = 0.8) {
+    return new Promise(resolve => {
+      // If not an image or size already small, return original
+      if (!file.type.startsWith('image/')) return resolve(file);
+
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          if (img.width <= maxWidth) return resolve(file);
+          const ratio = maxWidth / img.width;
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * ratio);
+          canvas.height = Math.round(img.height * ratio);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(blob => {
+            // keep filename but convert to jpg to save size
+            const newName = file.name.replace(/\.\w+$/, '.jpg');
+            const newFile = new File([blob], newName, { type: 'image/jpeg' });
+            resolve(newFile);
+          }, 'image/jpeg', quality);
+        };
+        img.onerror = () => resolve(file); // fallback
+        img.src = ev.target.result;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function uploadSingleFile(file, idx) {
+    // show status row
+    const row = document.createElement('div');
+    row.className = 'file-row';
+    row.innerHTML = `<span>${idx+1}. ${file.name}</span><span class="file-status">Чекає...</span>`;
+    resultDiv.appendChild(row);
+
+    try {
+      // Resize to avoid 413
+      row.querySelector('.file-status').textContent = 'Оптимізація...';
+      const smallFile = await resizeImageIfNeeded(file);
+
+      // Upload
+      row.querySelector('.file-status').textContent = 'Завантаження...';
+      const fd = new FormData();
+      fd.append('file', smallFile);
+
+      const resp = await fetch('/api/upload', { method: 'POST', body: fd });
+      const json = await resp.json();
+
+      if (!resp.ok) {
+        row.querySelector('.file-status').textContent = `Помилка: ${json.error || resp.status}`;
+        return null;
       }
+
+      // server may return { url } or { urls }
+      const url = json.url || (Array.isArray(json.urls) ? json.urls[0] : null);
+      if (!url) {
+        row.querySelector('.file-status').textContent = 'Помилка: невірна відповідь сервера';
+        return null;
+      }
+
+      row.querySelector('.file-status').innerHTML = `Готово <button class="link-btn" onclick="copyToClipboard('${url}')">Копіювати</button>`;
+      // also add clickable link
+      const linkElem = document.createElement('div');
+      linkElem.style.marginTop = '6px';
+      linkElem.innerHTML = `<a href="${url}" target="_blank" rel="noopener">${url}</a>`;
+      row.appendChild(linkElem);
+
+      return url;
+    } catch (err) {
+      row.querySelector('.file-status').textContent = 'Помилка при завантаженні';
+      return null;
+    }
+  }
+
+  async function uploadImage() {
+    if (!fileInput.files.length) { alert('Завантажте фото!'); return; }
+
+    uploadBtn.disabled = true;
+    loader.style.display = 'block';
+    resultDiv.innerHTML = '';
+
+    const files = [...fileInput.files].slice(0, MAX_FILES);
+    const urls = [];
+
+    // sequential upload to avoid big multipart payloads and 413 errors
+    for (let i = 0; i < files.length; i++) {
+      const url = await uploadSingleFile(files[i], i);
+      if (url) urls.push(url);
     }
 
+    loader.style.display = 'none';
+    uploadBtn.disabled = false;
 
-    fileInput.addEventListener('change', function () {
-      if (this.files.length > 10) {
-        alert("Можна завантажити максимум 10 фото!");
-        this.value = ""; 
-      }
-    });
-
-    fileInput.addEventListener('change', updateFileCount);
-
-    dropArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropArea.style.backgroundColor = "#eef6ff";
-    });
-
-    dropArea.addEventListener('dragleave', () => {
-      dropArea.style.backgroundColor = "transparent";
-    });
-
-    dropArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      fileInput.files = e.dataTransfer.files;
-      dropArea.style.backgroundColor = "transparent";
-      updateFileCount();
-    });
-
-    async function uploadImage() {
-      if (!fileInput.files.length) {
-        alert('Завантажте фото!');
-        return;
-      }
-
-      const formData = new FormData();
-      [...fileInput.files].slice(0, 10).forEach(file => formData.append('file', file));
-
-      document.getElementById('loader').style.display = 'block';
-      document.getElementById('result').innerHTML = '';
-
-      try {
-        const response = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await response.json();
-        const resultDiv = document.getElementById('result');
-
-        if (response.ok && data.urls) {
-          resultDiv.innerHTML = data.urls.map(url => `
-            <p><strong>Link:</strong> <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></p>
-            <button onclick="copyToClipboard('${url}')">Копіювати</button>
-          `).join('');
-          clearBtn.classList.add('show');
-        } else {
-          resultDiv.textContent = 'Помилка: ' + (data.error || 'Невідома помилка');
-        }
-      } catch (err) {
-        document.getElementById('result').textContent = 'Помилка при запиті';
-      } finally {
-        document.getElementById('loader').style.display = 'none';
-      }
+    if (urls.length) {
+      clearBtn.disabled = false;
     }
+  }
 
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        showToast();
-      });
-    }
-
-    function showToast() {
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
       toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2500);
-    }
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+  }
 
-    function clearResults() {
-      document.getElementById('result').innerHTML = '';
-      fileInput.value = '';
-      updateFileCount();
-      clearBtn.classList.remove('show');
-    }
-  </script>
+  function clearResults() {
+    resultDiv.innerHTML = '';
+    fileInput.value = '';
+    updateFileCount();
+    clearBtn.disabled = true;
+  }
+</script>
 </body>
-
 </html>
