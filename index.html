@@ -102,7 +102,7 @@
       cursor: pointer;
     }
 
-    
+
 
     button.primary:hover {
       background-color: #0056b3;
@@ -327,7 +327,7 @@
         row.querySelector('.file-status').innerHTML = `Готово <button class="link-btn" onclick="copyToClipboard('${url}')">Копіювати</button>`;
         const linkElem = document.createElement('div');
         linkElem.style.marginTop = '6px';
-        linkElem.innerHTML = `<a href="${url}" target="_blank" rel="noopener">${url}</a>`;
+        // linkElem.innerHTML = `<a href="${url}" target="_blank" rel="noopener">${url}</a>`;
         row.appendChild(linkElem);
 
         return url;
