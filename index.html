@@ -111,8 +111,8 @@
     #result {
       margin-top: 18px;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+      flex-direction: column;
+      text-align: left;
       overflow: auto;
     }
 
@@ -299,7 +299,7 @@
     async function uploadSingleFile(file, idx) {
       const row = document.createElement('div');
       row.className = 'file-row';
-      row.innerHTML = `<span>${idx + 1}. ${file.name}</span><span class="file-status">Чекає...</span>`;
+      row.innerHTML = `<span>${idx + 1}.</span><span class="file-status">Чекає...</span>`;
       resultDiv.appendChild(row);
 
       try {
